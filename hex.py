@@ -7,86 +7,18 @@ from LiSE import Engine
 from LiSE.allegedb import GraphNameError
 import networkx as nx
 from random import randrange
+from agent import Human, Player
+from ui import UI
 
 #class Hex(Button):
 	
-app = Ursina()
-window.color = color._20
-
-gold = 0
-counter = Text(text='Choose a starting location.', y=.4, z=-1, scale=2, origin=(0,0), background=True)
-left_text = Text(text='Left Text.', y=.4, x=-.6, z=-1, scale=2, origin=(0,0), background=True)
-right_text = Text(text='Right Text.', y=.4, x=.6, z=-1, scale=2, origin=(0,0), background=True)
-action1 = Button(text="Gather Time", disabled=True, visible=False, y=.3, x=.6, z=-1, scale=(.2,.05,.1), origin=(0,0))
-action2 = Button(text="Gather Space", disabled=True, visible=False, y=.245, x=.6, z=-1, scale=(.2,.05,.1), origin=(0,0))
-left_text.visible = False
-#right_text.visible = False
-#player_icon = 'sword'
 
 
-def tick():
-	# TODO replace this with ticking all the hexes 
-	Hex.current.tick()
-	if Hex.current.taint <=0:
-		action1.disabled = True
-	else:
-		action1.disabled = False
-	if player.taint > 0:
-		action2.text = "Ground"
-		action2.on_click = player.ground
-		action2.disabled = False
-		action2.visible = True
-	else:
-		action2.disabled = True
+
 	
-class Agent(Entity):
-	def __init__(self, location, texture):
-		self.location = location
-		#Entity(parent=self.model, name=f'buttonicon_entity_{value}', model='quad', texture=value, z=-.1, add_to_scene_entities=False)
-		super().__init__(parent=location, model='quad', scale=location.scale,texture=texture, disabled=False, z=-.1)
-	
-	def tick(self):
-		raise NotImplementedError("Children of Agent should implement this")
 
 player = None
-class Player(Agent):
-	def __init__(self, location):
-		self.taint = 0
-		self.turn = 1
-		super().__init__(location, "vine-flower")
-		
-	@classmethod
-	def createPlayer(cls, location):
-		global player
-		player = Player(location)
-		
-	def tick(self):
-		counter.text = "Turn: "+str(self.turn)
 
-	def purify(self):
-		purify_amount = 10 * ((100.0-self.taint)/100)
-		self.taint = self.taint + 1 
-		Hex.current.taint  -= purify_amount
-		if Hex.current.taint < 0:
-			Hex.current.taint = 0 
-		left_text.text = str((Hex.current))
-		self.turn = self.turn + 1
-		tick()
-		right_text.text = "Your taint: "+str(self.taint)+"%"
-		if self.taint >100:
-			counter.text = "You Died!"
-	
-	def ground(self):
-		self.taint -= 10
-		if self.taint < 0:
-			self.taint = 0 
-		self.turn = self.turn + 1
-		tick()
-		right_text.text = "Your taint: "+str(self.taint)+"%"
-
-class Human(Agent):
-	def __init__(self, location):
-		super().__init__(location, "human")
 		
 class Hex(Button):
 	current = None
@@ -120,25 +52,41 @@ class Hex(Button):
 	def tick(self):
 		self.color = self.base_color.tint(self.taint/100)
 
+	def adjacent(self, location):
+		# We are adjacent if the absolute value of the sum of differences is 1 or 0 (1,1) and (-1,-1) aren't adjacent
+		q_diff = self.q-location.q
+		if abs(q_diff) > 1:
+			return False
+		r_diff = self.r-location.r
+		if abs(r_diff) > 1:
+			return False
+		print(q_diff)
+		print(r_diff)
+		print(abs(q_diff + r_diff))
+		return abs(q_diff+r_diff) <= 1
+
 	def select(self):
-		global player
 		if Hex.current and Hex.current != self:
 			Hex.current.scale = Hex.current.base_scale
 		#self.text = "clicked"
 		self.scale = self.base_scale * 1.2
 		#self.icon = "human"
 		Hex.current = self
-		left_text.text = str((self))
-		left_text.visible = True
-		if player is None:
-			Player.createPlayer(self)
-		if(self.taint > 0):
-			action1.text = "Purify"
-			action1.on_click = player.purify
-			action1.disabled = False 
-			action1.visible = True
+		UI.left_text.text = str((self))
+		UI.left_text.visible = True
+		player = Player.getOrCreatePlayer(self)
+		print(self)
+		print(player.location)
+		if(player.location == self):
+			if(self.taint > 0):
+				UI.add_action("Purify", player.purify)
+			else:
+				UI.remove_action("Purify")
+		elif(self.adjacent(player.location)):
+			player.target = self
+			UI.add_action("Move here", player.move)
 		else:
-			action1.disabled = True
+			UI.remove_action("Move here")
 	
 	def __str__(self):
 		result = str((self.q,self.r))
@@ -159,12 +107,4 @@ class Hex(Button):
 
 
 
-Hex.create_map(3)
-print("\n\nHex MAP!\n\n")
-print(Hex.map.nodes)
-print(Hex.map["(0, 0)"])
-print(Hex.map["(0, 0)"])
-print("======================")
 
-
-app.run()
