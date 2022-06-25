@@ -6,10 +6,7 @@ python hex.py
 
 
 todo:
-make a main.py so we can build this
-limit player actions to player location
-add method of accessing adjacent locations in code
-let player move to other locations
+add method of accessing adjacent locations in code by coordinates
 have humans wander
 make humans  have chance to build village
 make villages chance to spawn humans 
