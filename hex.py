@@ -24,6 +24,7 @@ class Hex(Button):
 	current = None
 	agents = []
 	map = nx.Graph() #https://github.com/networkx/networkx/blob/main/networkx/classes/graph.py
+	location_hash = {}
 	directions = {
 		"northeast":(1,-1),
 		"east" : (1,0),
@@ -42,6 +43,7 @@ class Hex(Button):
 		self.on_click = self.select		
 		label = str((self.q,self.r))
 		Hex.map.add_node(label, data=self)
+		Hex.location_hash[label] = self
 		self.base_color = color
 		self.base_scale = scale
 		self.taint = randrange(1,100)
@@ -94,6 +96,10 @@ class Hex(Button):
 		result = str((self.q,self.r))
 		result += "\ntaint:\t"+str(round(self.taint,1))+"%"
 		return result
+
+	@classmethod
+	def get(cls, q, r):
+		return cls.location_hash[str((q,r))]
 
 	@classmethod
 	def create_map(cls, radius):

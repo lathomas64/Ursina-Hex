@@ -27,8 +27,7 @@ def tick():
 Hex.create_map(3)
 print("\n\nHex MAP!\n\n")
 print(Hex.map.nodes)
-print(Hex.map["(0, 0)"])
-print(Hex.map["(0, 0)"])
+print(Hex.get(0,0))
 print("======================")
 
 
