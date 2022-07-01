@@ -78,12 +78,14 @@ class Hex(Button):
 		print(self)
 		print(player.location)
 		if(player.location == self):
+			UI.remove_action("Move here")
 			if(self.taint > 0):
 				UI.add_action("Purify", player.purify)
 			else:
 				UI.remove_action("Purify")
 		elif(self.adjacent(player.location)):
 			player.target = self
+			UI.remove_action("Purify")
 			UI.add_action("Move here", player.move)
 		else:
 			UI.remove_action("Move here")

@@ -70,6 +70,7 @@ class Player(Agent):
     def move(self):
         self.turn = self.turn + 1
         super().move()
+        UI.remove_action("Move here")
         if (self.location.taint > 0):
             UI.add_action("Purify", self.purify)
         else:
