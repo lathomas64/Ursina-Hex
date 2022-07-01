@@ -25,10 +25,5 @@ def tick():
 		action2.disabled = True
 
 Hex.create_map(3)
-print("\n\nHex MAP!\n\n")
-print(Hex.map.nodes)
-print(Hex.get(0,0))
-print("======================")
-
 
 app.run()

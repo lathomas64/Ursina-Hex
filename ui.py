@@ -10,9 +10,6 @@ class UI:
 
     @classmethod
     def add_action(cls, text, callback):
-        print(text)
-        print(cls.actions)
-        print(cls.active_actions)
         if text not in cls.actions:
             new_button  = Button(text=text,
                                         disabled=False,
@@ -22,15 +19,12 @@ class UI:
             cls.actions[text] = new_button
 
         cls.actions[text].on_click = callback
-        print(cls.actions)
-        print("***")
         if text not in cls.active_actions:
             cls.active_actions[text] = cls.actions[text]
         cls.update_ui()
 
     @classmethod
     def remove_action(cls, text):
-        traceback.print_exception(*sys.exc_info())
         if text in cls.active_actions:
             del cls.active_actions[text]
         cls.update_ui()
@@ -42,19 +36,15 @@ class UI:
 
     @classmethod
     def update_ui(cls):
-        print("update UI!!!!!!!!!!!!!!!!")
         position = 0
         for label in cls.actions:
             if label in cls.active_actions:
-                print("active:"+label)
                 action = cls.active_actions[label]
                 action.y = cls.start_y-position*cls.margin_y
                 position += 1
                 action.visible = True
                 action.disabled = False
-                print(action.disabled)
             else:
-                print("inactive:" + label)
                 action = cls.actions[label]
                 action.y = 9000
                 action.visible = False

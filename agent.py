@@ -1,23 +1,16 @@
 from ursina import Entity
 from ui import UI
+import random
 
 class Agent(Entity):
     def __init__(self, location, texture):
         self.location = location
+        location.agents.append(self)
         # Entity(parent=self.model, name=f'buttonicon_entity_{value}', model='quad', texture=value, z=-.1, add_to_scene_entities=False)
         super().__init__(parent=location, model='quad', scale=location.scale, texture=texture, disabled=False, z=-.1)
 
     def tick(self):
         raise NotImplementedError("Children of Agent should implement this")
-
-    def move(self):
-        if self.target == None:
-            return
-        else:
-            self.parent = self.target
-            self.location = self.target
-            self.target = None
-            self.tick()
 
 
 class Player(Agent):
@@ -53,30 +46,48 @@ class Player(Agent):
             self.location.taint = 0
         UI.left_text.text = str((self.location))
         self.turn = self.turn + 1
-        self.tick()
         UI.right_text.text = "Your taint: " + str(self.taint) + "%"
         if self.taint > 100:
             UI.main_text.text = "You Died!"
-        self.location.tick()
+        self.location.tick_all()
+
 
     def ground(self):
         self.taint -= 10
         if self.taint < 0:
             self.taint = 0
         self.turn = self.turn + 1
-        self.tick()
         UI.right_text.text = "Your taint: " + str(self.taint) + "%"
+        self.location.tick_all()
 
     def move(self):
         self.turn = self.turn + 1
-        super().move()
+        if self.target == None:
+            return
+        else:
+            self.parent = self.target
+            self.location = self.target
+            self.target = None
         UI.remove_action("Move here")
         if (self.location.taint > 0):
             UI.add_action("Purify", self.purify)
         else:
             UI.remove_action("Purify")
+        self.location.tick_all()
 
 
 class Human(Agent):
     def __init__(self, location):
         super().__init__(location, "human")
+
+    def tick(self):
+        self.target = self.location.get_random_neighbor()
+        self.move()
+
+    def move(self):
+        if self.target == None:
+            return
+        else:
+            self.parent = self.target
+            self.location = self.target
+            self.target = None

@@ -6,7 +6,7 @@ from ursina import *
 from LiSE import Engine
 from LiSE.allegedb import GraphNameError
 import networkx as nx
-from random import randrange
+from random import randrange, choice
 from agent import Human, Player
 from ui import UI
 
@@ -26,12 +26,12 @@ class Hex(Button):
 	map = nx.Graph() #https://github.com/networkx/networkx/blob/main/networkx/classes/graph.py
 	location_hash = {}
 	directions = {
-		"northeast":(1,-1),
+		"northeast":(0,1),
 		"east" : (1,0),
-		"southeast" : (0,1),
-		"northwest" : (0,-1),
+		"southeast" : (1,-1),
+		"northwest" : (-1,1),
 		"west" : (-1,0),
-		"southwest" : (-1,1)
+		"southwest" : (0,-1)
 	}
 	def __init__(self, q,r,scale = .125, color=color.azure, disabled=False, **kwargs):
 		self.q = q
@@ -53,6 +53,8 @@ class Hex(Button):
 	
 	def tick(self):
 		self.color = self.base_color.tint(self.taint/100)
+		for agent in self.agents:
+			agent.tick()
 
 	def adjacent(self, location):
 		# We are adjacent if the absolute value of the sum of differences is 1 or 0 (1,1) and (-1,-1) aren't adjacent
@@ -97,9 +99,27 @@ class Hex(Button):
 		result += "\ntaint:\t"+str(round(self.taint,1))+"%"
 		return result
 
+	def get_random_neighbor(self):
+		direction = choice(list(self.directions.values()))
+		result = Hex.get(self.q+direction[0], self.r+direction[1])
+		print(str(self) + "->" + str(result))
+		if result is not None:
+			print(self.adjacent(result))
+		else:
+			print("empty result")
+		return result
+
+	@classmethod
+	def tick_all(cls):
+		for hex_label in cls.location_hash:
+			cls.location_hash[hex_label].tick()
+
 	@classmethod
 	def get(cls, q, r):
-		return cls.location_hash[str((q,r))]
+		try:
+			return cls.location_hash[str((q,r))]
+		except KeyError:
+			return None
 
 	@classmethod
 	def create_map(cls, radius):
