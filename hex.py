@@ -127,6 +127,7 @@ class Hex(Button):
 			for r in range(-radius, radius+1):
 				if abs(q+r) <=radius:
 					hex = Hex(q,r)
+		return cls.map
 
 		#cls.map["created"] = {}
 		#cls.map["created"][(0,0)] = 

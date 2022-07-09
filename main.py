@@ -1,6 +1,7 @@
 from hex import Hex
 from ui import UI
 from agent import Player
+from LiSE import Engine
 from ursina import Ursina, color, window
 
 player = None
@@ -24,6 +25,7 @@ def tick():
 	else:
 		action2.disabled = True
 
-Hex.create_map(3)
-
-app.run()
+with Engine(clear=True) as eng:
+	map = Hex.create_map(3)
+	eng.new_character('locations', map)
+	app.run()
