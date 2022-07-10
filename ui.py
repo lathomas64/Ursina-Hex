@@ -1,5 +1,4 @@
 from ursina import Text, Button
-import traceback, sys
 
 class UI:
     actions = {}
